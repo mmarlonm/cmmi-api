@@ -102,4 +102,17 @@ router.post('/restore/:id', async (req, res) => {
   }
 });
 
+// @route   GET /api/analysis/all-sprints
+// @desc    Get latest active analysis for every sprint stored in DB (for trend comparison)
+router.get('/all-sprints', async (req, res) => {
+  try {
+    const analyses = await MetricAnalysis.find({ isActive: true })
+      .select('sprintId sprintName version metrics metricAnalyses createdAt')
+      .sort({ createdAt: 1 });
+    return res.json(analyses);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
