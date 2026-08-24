@@ -6,7 +6,7 @@ const MetricAnalysis = require('../models/MetricAnalysis');
 // @desc    Save new analysis or create a new version of metrics analysis
 router.post('/', async (req, res) => {
   try {
-    const { sprintId, sprintName, metrics, aiAnalysis } = req.body;
+    const { sprintId, sprintName, metrics, aiAnalysis, metricAnalyses } = req.body;
 
     if (!sprintId || !sprintName || !metrics || !aiAnalysis) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -25,6 +25,7 @@ router.post('/', async (req, res) => {
       version: nextVersion,
       metrics,
       aiAnalysis,
+      metricAnalyses: metricAnalyses || {},
       isActive: true
     });
 

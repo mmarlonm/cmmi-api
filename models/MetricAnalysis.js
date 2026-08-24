@@ -27,6 +27,11 @@ const MetricAnalysisSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  // Individual metric analyses stored by key (e.g. 'densidad de defectos', 'eed', etc.)
+  metricAnalyses: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -39,3 +44,4 @@ const MetricAnalysisSchema = new mongoose.Schema({
 MetricAnalysisSchema.index({ sprintId: 1, version: 1 }, { unique: true });
 
 module.exports = mongoose.model('MetricAnalysis', MetricAnalysisSchema);
+
