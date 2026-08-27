@@ -3,7 +3,7 @@ const router = express.Router();
 const MetricAnalysis = require('../models/MetricAnalysis');
 
 // @route   POST /api/analysis
-// @desc    Save new analysis or create a new version of metrics analysis
+// @desc    Save/Upsert metrics analysis for a specific sprint (no versions, overwrite existing)
 router.post('/', async (req, res) => {
   try {
     const { sprintId, sprintName, metrics, aiAnalysis, metricAnalyses } = req.body;
@@ -12,25 +12,21 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Deactivate previous active analyses for this sprint
-    await MetricAnalysis.updateMany({ sprintId, isActive: true }, { isActive: false });
+    const updatedAnalysis = await MetricAnalysis.findOneAndUpdate(
+      { sprintId },
+      {
+        sprintId,
+        sprintName,
+        version: 1,
+        metrics,
+        aiAnalysis,
+        metricAnalyses: metricAnalyses || {},
+        isActive: true
+      },
+      { new: true, upsert: true }
+    );
 
-    // Determine the next version number
-    const lastEntry = await MetricAnalysis.findOne({ sprintId }).sort({ version: -1 });
-    const nextVersion = lastEntry ? lastEntry.version + 1 : 1;
-
-    const newAnalysis = new MetricAnalysis({
-      sprintId,
-      sprintName,
-      version: nextVersion,
-      metrics,
-      aiAnalysis,
-      metricAnalyses: metricAnalyses || {},
-      isActive: true
-    });
-
-    await newAnalysis.save();
-    return res.status(201).json(newAnalysis);
+    return res.status(200).json(updatedAnalysis);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -40,7 +36,7 @@ router.post('/', async (req, res) => {
 // @desc    Get the latest active analysis for a specific sprint
 router.get('/sprint/:sprintId', async (req, res) => {
   try {
-    const analysis = await MetricAnalysis.findOne({ sprintId: req.params.sprintId, isActive: true });
+    const analysis = await MetricAnalysis.findOne({ sprintId: req.params.sprintId });
     if (!analysis) {
       return res.status(404).json({ message: 'No analysis found for this sprint' });
     }
@@ -51,13 +47,18 @@ router.get('/sprint/:sprintId', async (req, res) => {
 });
 
 // @route   GET /api/analysis/sprint/:sprintId/versions
-// @desc    Get all versions history list for a sprint
+// @desc    Get all versions history list for a sprint (now returns single item representing the active sprint)
 router.get('/sprint/:sprintId/versions', async (req, res) => {
   try {
-    const history = await MetricAnalysis.find({ sprintId: req.params.sprintId })
-      .select('version isActive createdAt')
-      .sort({ version: -1 });
-    return res.json(history);
+    const analysis = await MetricAnalysis.findOne({ sprintId: req.params.sprintId });
+    if (!analysis) {
+      return res.json([]);
+    }
+    return res.json([{
+      version: 1,
+      isActive: true,
+      createdAt: analysis.createdAt
+    }]);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
