@@ -6,9 +6,9 @@ const MetricAnalysis = require('../models/MetricAnalysis');
 // @desc    Save/Upsert metrics analysis for a specific sprint (no versions, overwrite existing)
 router.post('/', async (req, res) => {
   try {
-    const { sprintId, sprintName, metrics, aiAnalysis, metricAnalyses } = req.body;
+    const { sprintId, sprintName, metrics, aiAnalysis, metricAnalyses, metricComments } = req.body;
 
-    if (!sprintId || !sprintName || !metrics || !aiAnalysis) {
+    if (!sprintId || !sprintName || !metrics) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -19,8 +19,9 @@ router.post('/', async (req, res) => {
         sprintName,
         version: 1,
         metrics,
-        aiAnalysis,
+        aiAnalysis: aiAnalysis || "",
         metricAnalyses: metricAnalyses || {},
+        metricComments: metricComments || {},
         isActive: true
       },
       { new: true, upsert: true }

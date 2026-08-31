@@ -25,10 +25,15 @@ const MetricAnalysisSchema = new mongoose.Schema({
   },
   aiAnalysis: {
     type: String,
-    required: true
+    default: ""
   },
   // Individual metric analyses stored by key (e.g. 'densidad de defectos', 'eed', etc.)
   metricAnalyses: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+  // User comments/context captured manually per metric
+  metricComments: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
   },
