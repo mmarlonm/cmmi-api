@@ -54,8 +54,9 @@ router.get('/folder', async (req, res) => {
     }
 
     const spResponse = await fetch(spUrl, {
-      method: 'GET',
+      method: 'POST',
       headers,
+      body: '{}',
       credentials: 'include'
     });
 
