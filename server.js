@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const analysisRoutes = require('./routes/analysis.routes');
+const processRoutes = require('./routes/process.routes');
+const sharepointRoutes = require('./routes/sharepoint.routes');
 
 // Load environment variables
 dotenv.config();
@@ -18,6 +20,8 @@ app.use(express.json({ limit: '50mb' })); // support large metrics payloads
 
 // Routes
 app.use('/api/analysis', analysisRoutes);
+app.use('/api/process', processRoutes);
+app.use('/api/sharepoint', sharepointRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
